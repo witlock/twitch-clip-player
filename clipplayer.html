@@ -1,0 +1,78 @@
+<html>
+
+<!--Clip player made by Witlock. I WANT CREDIT FOR MY 30 MINUTES OF HARD WORK -->
+    <head>
+
+        <style>
+            
+            body, iframe {
+                margin: 0;
+            }
+            iframe {
+                width: 100%;
+                height: 100%;
+            }
+            </style>
+    </head>
+    <body>
+            
+            <iframe id="clip-iframe" frameborder='0' scrolling='no' allowfullscreen='true'>
+
+            </iframe>
+            
+    </body>
+
+    <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+    <script>
+
+        var twitchChannel = "witlock";
+        var apiKey = ""; // Get the Client Key from https://dev.twitch.tv/console
+        var clipLimit = 100;
+        var period = "all";
+        var playDelay = 2500;
+        videos = [];
+
+
+        var httpRequest = new XMLHttpRequest();
+
+        httpRequest.addEventListener('load', clipsLoaded);
+        httpRequest.open('GET', 'https://api.twitch.tv/kraken/clips/top?channel='+twitchChannel+'&limit='+clipLimit+'&period='+period+'&game=https://www.twitch.tv/directory/game/Science%20%26%20Technology');
+        httpRequest.setRequestHeader('Client-ID', apiKey);
+        httpRequest.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
+        httpRequest.send();
+
+        function clipsLoaded() {
+
+            var clipsDisplay = document.getElementById('clips-display'),
+            clipList = JSON.parse(httpRequest.responseText);
+            clipList.clips.forEach(function(clip, index, array) {
+                videos.push({ clipContent: clip.embed_url, duration: clip.duration });
+            });
+
+            shuffle(videos);
+            playClip(0);
+        }
+
+
+        function playClip(currentIndex)
+        {
+            var currentClip = videos[currentIndex];
+            var clipContainer = document.getElementById('clip-iframe');
+            clipContainer.src = currentClip.clipContent;
+
+            currentIndex++
+            if(currentIndex >= videos.length)
+                currentIndex = 0;
+
+            setTimeout(function(){
+                playClip(currentIndex);
+            }, currentClip.duration * 1000 + playDelay);
+        }
+
+        function shuffle(array) {
+  array.sort(() => Math.random() - 0.5);
+}
+    </script>
+</html>
+
+
