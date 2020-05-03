@@ -11,3 +11,13 @@ Add as browser source and fill in the client key by creating an app at https://d
 6. Add a new browser source in OBS and browse to **clipplayer.html**
 
 If the clips are getting cut off while playing change the **var playDelay = 2500;** to some higher value (milliseconds)
+
+You can avoid certain clips by adding the **slugs** (twitch.tv/witlock/clip/**ToughAdorableNewtFutureMan**?filter=clips&range=7d&sort=time) to the skipClips array.
+
+```
+skipClips = [
+    'ToughAdorableNewtFutureMan',
+    'ShySullenMallardDancingBaby',
+    'your clip slug',
+    'your second clip slug']
+```
