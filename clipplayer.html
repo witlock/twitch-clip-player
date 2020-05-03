@@ -26,16 +26,20 @@
 
         var twitchChannel = "witlock";
         var apiKey = ""; // Get the Client Key from https://dev.twitch.tv/console
-        var clipLimit = 100;
+        var clipLimit = 100; // 100 is max
         var period = "all";
-        var playDelay = 2500;
+        var playDelay = 2500; // milliseconds before next clip is played
+        var category
         videos = [];
+        skipClips = [
+            'ToughAdorableNewtFutureMan',
+            'ShySullenMallardDancingBaby'] // list of ignored clips by url/slug
 
 
         var httpRequest = new XMLHttpRequest();
 
         httpRequest.addEventListener('load', clipsLoaded);
-        httpRequest.open('GET', 'https://api.twitch.tv/kraken/clips/top?channel='+twitchChannel+'&limit='+clipLimit+'&period='+period+'&game=https://www.twitch.tv/directory/game/Science%20%26%20Technology');
+        httpRequest.open('GET', 'https://api.twitch.tv/kraken/clips/top?channel='+twitchChannel+'&limit='+clipLimit+'&period='+period);
         httpRequest.setRequestHeader('Client-ID', apiKey);
         httpRequest.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
         httpRequest.send();
@@ -45,7 +49,8 @@
             var clipsDisplay = document.getElementById('clips-display'),
             clipList = JSON.parse(httpRequest.responseText);
             clipList.clips.forEach(function(clip, index, array) {
-                videos.push({ clipContent: clip.embed_url, duration: clip.duration });
+                if(!skipClips.includes(clip.slug))
+                    videos.push({ clipContent: clip.embed_url, duration: clip.duration });
             });
 
             shuffle(videos);
