@@ -1,82 +1,145 @@
 <html>
-    <!-- Clip player made by Witlock. -->
-    <head>
+<!-- Clip player made by Witlock -->
 
-        <style>
-            
-            body, iframe {
-                margin: 0;
-            }
-            iframe {
-                width: 100%;
-                height: 100%;
-            }
-            </style>
-    </head>
-    <body>
-            
-            <iframe id="clip-iframe" frameborder='0' scrolling='no' allowfullscreen='true'>
-
-            </iframe>
-            
-    </body>
-
-    <script src="https://code.jquery.com/jquery-3.5.0.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
-    <script>
-
-        var twitchChannel = "witlock";
-        var apiKey = ""; // Get the Client Key from https://dev.twitch.tv/console
-        var clipLimit = 100; // 100 is max
-        var period = "all";
-        var playDelay = 2500; // milliseconds before next clip is played
-        var category
-        videos = [];
-        skipClips = [
-            'ToughAdorableNewtFutureMan',
-            'ShySullenMallardDancingBaby'] // list of ignored clips by url/slug
-
-
-        var httpRequest = new XMLHttpRequest();
-
-        httpRequest.addEventListener('load', clipsLoaded);
-        httpRequest.open('GET', 'https://api.twitch.tv/kraken/clips/top?channel='+twitchChannel+'&limit='+clipLimit+'&period='+period);
-        httpRequest.setRequestHeader('Client-ID', apiKey);
-        httpRequest.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
-        httpRequest.send();
-
-        function clipsLoaded() {
-
-            var clipsDisplay = document.getElementById('clips-display'),
-            clipList = JSON.parse(httpRequest.responseText);
-            clipList.clips.forEach(function(clip, index, array) {
-                if(!skipClips.includes(clip.slug))
-                    videos.push({ clipContent: clip.embed_url, duration: clip.duration });
-            });
-
-            shuffle(videos);
-            playClip(0);
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@1,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            height: 100%;
+            font-family: 'Open Sans', sans-serif;
         }
 
+        iframe {
+            width: 100%;
+            height: auto;
+            z-index: 1;
+        }
 
-        function playClip(currentIndex)
-        {
-            var currentClip = videos[currentIndex];
-            var clipContainer = document.getElementById('clip-iframe');
-            clipContainer.src = currentClip.clipContent;
+        #clip-title {
+            text-align: center;
 
-            currentIndex++
-            if(currentIndex >= videos.length)
-                currentIndex = 0;
+            color: white;
+            font-size: large;
+        }
 
-            setTimeout(function(){
+        #clip-title h1 {
+            margin-top: 0;
+        }
+
+        #background-text {
+            position: absolute;
+            width: 300px;
+            height: 100px;
+            top: 50%;
+            left: 50%;
+            margin-left: -150px;
+            margin-top: -50px;
+            z-index: -1;
+        }
+
+        #background-text h1 {
+            font-size: 3em;
+        }
+
+        .container {
+            display: flex;
+            flex-flow: column;
+            height: 100%;
+        }
+
+        .container header {
+            flex: 0 1 auto;
+        }
+
+        .container .content {
+            flex: 1 1 auto;
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="background-text">
+        <h1>Loading Clip</h1>
+    </div>
+    <div class="container">
+        <header>
+            <div id="clip-title"></div>
+        </header>
+        <div class="content">
+            <iframe id="clip-iframe" frameborder='0' scrolling='no' allowfullscreen='true'>
+            </iframe>
+        </div>
+    </div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.5.0.min.js"
+    integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
+<script>
+    var twitchChannel = "witlock";
+    var apiKey = ""; // Get the Client Key from https://dev.twitch.tv/console
+    var clipLimit = 100;
+    var period = "all";
+    var playDelay = 2500;
+    var showTitle = true;
+    var showPlayingClipText = true;
+    var category
+    videos = [];
+    skipClips = [
+        'ToughAdorableNewtFutureMan',
+        'ShySullenMallardDancingBaby']
+
+
+    var httpRequest = new XMLHttpRequest();
+
+    httpRequest.addEventListener('load', clipsLoaded);
+    httpRequest.open('GET', 'https://api.twitch.tv/kraken/clips/top?channel=' + twitchChannel + '&limit=' + clipLimit + '&period=' + period);
+    httpRequest.setRequestHeader('Client-ID', apiKey);
+    httpRequest.setRequestHeader('Accept', 'application/vnd.twitchtv.v5+json');
+    httpRequest.send();
+
+    function clipsLoaded() {
+
+        var clipsDisplay = document.getElementById('clips-display'),
+            clipList = JSON.parse(httpRequest.responseText);
+        clipList.clips.forEach(function (clip, index, array) {
+            if (!skipClips.includes(clip.slug))
+                videos.push({ clipContent: clip.embed_url, duration: clip.duration, title: clip.title });
+        });
+
+        shuffle(videos);
+        playClip(0);
+    }
+
+    function playClip(currentIndex) {
+        var currentClip = videos[currentIndex];
+        var clipContainer = document.getElementById('clip-iframe');
+        var clipTitle = document.getElementById('clip-title');
+        clipContainer.src = currentClip.clipContent;
+        if (showTitle)
+            clipTitle.innerHTML =
+                (showPlayingClipText ? 'Playing Clip: ' : '') +
+                '<h1>' + currentClip.title + '</h1>';
+
+        currentIndex++
+        if (currentIndex >= videos.length)
+            currentIndex = 0;
+
+        clipContainer.onload = function () {
+            setTimeout(function () {
                 playClip(currentIndex);
             }, currentClip.duration * 1000 + playDelay);
-        }
+        };
 
-        function shuffle(array) {
-  array.sort(() => Math.random() - 0.5);
-}
-    </script>
+
+    }
+
+    function shuffle(array) {
+        array.sort(() => Math.random() - 0.5);
+    }
+
+</script>
+
 </html>
-
-
