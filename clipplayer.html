@@ -85,7 +85,7 @@
     var playDelay = 2500;
     var showTitle = true;
     var showPlayingClipText = true;
-    var category
+    var parent = "localhost" // where this will be hosted
     videos = [];
     skipClips = [
         'ToughAdorableNewtFutureMan',
@@ -117,7 +117,7 @@
         var currentClip = videos[currentIndex];
         var clipContainer = document.getElementById('clip-iframe');
         var clipTitle = document.getElementById('clip-title');
-        clipContainer.src = currentClip.clipContent;
+        clipContainer.src = currentClip.clipContent + "&autoplay=true&parent=" + parent;
         if (showTitle)
             clipTitle.innerHTML =
                 (showPlayingClipText ? 'Playing Clip: ' : '') +
